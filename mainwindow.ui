@@ -121,6 +121,16 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="pushButton_EpipolarMode">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Epipolar Mode</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QLabel" name="label_n_pixels_left">

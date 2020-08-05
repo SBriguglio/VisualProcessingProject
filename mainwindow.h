@@ -16,7 +16,6 @@
 #include <QPicture>
 #include <QGraphicsView>
 
-
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -41,6 +40,8 @@ private slots:
     void receivePixelLeft(QPoint pixel);
 
     void receivePixelRight(QPoint pixel);
+
+    void on_pushButton_EpipolarMode_clicked();
 
 protected:
     /*TODO:

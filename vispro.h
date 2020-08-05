@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <QDebug>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ float* ud_vector(int n, int m) {
     return(vec);
 }
 
-float** matrix(int n1, int n2, int m1, int m2) {
+float** ud_matrix(int n1, int n2, int m1, int m2) {
     /* create a matrix, for example matrix (1, 3, 1, 4); */
     float** mat;
     int i;
@@ -261,5 +262,43 @@ Outputs:
 #undef SIGN
 #undef MAX
 #undef PYTHAG
+
+void printMatrix(float** M, int m, int n) {
+    //print a matrix M
+    /*
+    INPUTS:
+        M: float** matrix
+        m: number of rows
+        n: number of columns
+    OUTPUT:
+        N/A
+    */
+    qDebug() << "Matrix:";
+    QString s;
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            s.append(QString(" %1").arg(M[i][j]));
+        }
+        qDebug() << s;
+        s = " ";
+    }
+}
+
+void printVector(float* V, int n) {
+    //prints a vector V
+    /*
+    INPUTS:
+        V: any float* vector
+        n: size of vector
+    OUTPUT:
+        N/A
+    */
+    QString s ="Vector:\n[";
+    for (int i = 1; i <= n; i++) {
+        s.append(' ').append((QString("%1").arg(V[i]))).append(' ');
+    }
+    qDebug() << s.append(']');
+}
+
 
 #endif // VISPRO_H

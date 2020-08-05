@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -91,6 +90,8 @@ void MainWindow::on_pushButton_stop_clicked()
         ui->pushButton_stop->setEnabled(true);
         ui->graphicsView_image_left->setInteractive(true);
         ui->graphicsView_image_right->setInteractive(true);
+    } else {
+        ui->pushButton_EpipolarMode->setEnabled(true);
     }
 }
 
@@ -115,5 +116,11 @@ void MainWindow::receivePixelLeft(QPoint pixel)
 }
 
 
-
-
+void MainWindow::on_pushButton_EpipolarMode_clicked()
+{
+    pixelChooser *a = this->ui->graphicsView_image_left;
+    pixelChooser *b = this->ui->graphicsView_image_right;
+    this->ui->graphicsView_image_left->fillSVD(a, b);
+    this->ui->graphicsView_image_left->SVD(a, b);
+    qDebug() << "SUCCESS???";
+}

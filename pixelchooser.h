@@ -61,6 +61,7 @@ private:
     float **_fundamentMatrix;
     float **_eigenMatrix;
     float *_eigenValues;
+    float *_minEigenvector;
     int _Size;
 };
 

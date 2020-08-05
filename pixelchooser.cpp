@@ -74,6 +74,15 @@ void pixelChooser::SVD(pixelChooser *a, pixelChooser *b)
     svdRoutine(svdMatrix, m, n, eigenValues, eigenMatrix);
     qDebug() << "SVD Complete";
 
+    a->_minEigenvector = getEigenVecMin(eigenMatrix, eigenValues);
+    b->_minEigenvector = a->_minEigenvector;
+    qDebug() << "minEigenvector Found";
+    printVector(b->_minEigenvector, 9);
+
+    a->_fundamentMatrix = eigenToCal(a->_minEigenvector);
+    b->_fundamentMatrix = a->_fundamentMatrix;
+    qDebug() << "Fundamental Matrix completed";
+    printMatrix(b->_fundamentMatrix, 3, 3);
 }
 
 void pixelChooser::mousePressEvent(QMouseEvent *event)

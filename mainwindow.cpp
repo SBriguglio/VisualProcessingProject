@@ -122,5 +122,8 @@ void MainWindow::on_pushButton_EpipolarMode_clicked()
     pixelChooser *b = this->ui->graphicsView_image_right;
     this->ui->graphicsView_image_left->fillSVD(a, b);
     this->ui->graphicsView_image_left->SVD(a, b);
-    qDebug() << "SUCCESS???";
+
+
+
+    this->ui->pushButton_EpipolarMode->setEnabled(false);
 }

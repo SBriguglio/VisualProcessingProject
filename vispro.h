@@ -300,5 +300,75 @@ void printVector(float* V, int n) {
     qDebug() << s.append(']');
 }
 
+float getEigenMin(float* W) {
+    //finds the minimum eigenvalue in a vector
+    /*
+    INPUT:
+        W: float* vector
+    OUTPUT:
+        temp: minimum value in W
+    */
+    float temp = W[1];
+    for (auto i = 2; i <= 9; i++) {
+        if (temp > W[i])
+            temp = W[i];
+    }
+    return temp;
+}
+
+int getEigenMinIndex(float* W) {
+    //find the index of the minimum eigenvalue in a vector
+    /*
+    INPUT:
+        W: float* vector
+    OUTPUT:
+        minI: index of minimum value in W
+    */
+    float temp = W[1];
+    int minI = 1;
+    for (int i = 2; i <= 9; i++) {
+        if (temp > W[i]) {
+            temp = W[i];
+            minI = i;
+        }
+
+    }
+    return minI;
+}
+
+float* getEigenVecMin(float** V, float* W) {
+    //returns the minimum eigenvector by finding the minimum eigenvalue in vector W and returning the vector at that index in matrix v
+    /*
+    INPUT:
+        V: matrix of eigenvectors
+        W: vector of eigenvalues
+    OUTPUT:
+        eigenvector: eigenvector corresponding to the minimum eigenvalue in vector W
+    */
+    int eigenMinIndex = getEigenMinIndex(W);
+    float* eigenvector = ud_vector(1, 9);
+    for (int i = 1; i <= 9; i++) {
+        eigenvector[i] = V[i][eigenMinIndex];
+    }
+    return eigenvector;
+}
+
+float** eigenToCal(float* eigenvecMin) {
+    // reshapes the eigenvector, eigenvecMin into the calibration matrix, cal. returns cal
+    /*
+    INPUT:
+        eigenvecMin: a 12x1 eigenvector
+    OUTPUT:
+        cal: a 3x4 calibration matrix
+    */
+    float** cal = ud_matrix(1, 3, 1, 3);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            cal[i + 1][j + 1] = eigenvecMin[(3*i + j) + 1];
+        }
+    }
+    return cal;
+}
+
 
 #endif // VISPRO_H

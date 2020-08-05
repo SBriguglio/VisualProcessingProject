@@ -42,13 +42,22 @@ private slots:
     void receivePixelRight(QPoint pixel);
 
 protected:
-
+    /*TODO:
+     *  make two arrays/lists/vectors to store QPoints or X,Y coordinates
+     *  change slots receiving points to add points to the above arrays
+     *  implement the same algorithm to find the fundamental matrix, should be able to use SVD Routine here
+     *  find eigenvectors corresponding to the minimum eigenvalues
+     *  reshape the eigenvector to be a fundamental matrix (3x3 i believe but double check)
+     *  see whiteboard for furthersteps
+     *  draw epipolar lines with method in Anotherone project above
+     */
 private:
     Ui::MainWindow *ui;
     QString file_path_left;
     QString file_path_right;
     QGraphicsScene *scene_left;
     QGraphicsScene *scene_right;
+
 
 };
 #endif // MAINWINDOW_H

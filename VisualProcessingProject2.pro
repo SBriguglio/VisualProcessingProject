@@ -22,7 +22,8 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    pixelchooser.h
+    pixelchooser.h \
+    vispro.h
 
 FORMS += \
     mainwindow.ui

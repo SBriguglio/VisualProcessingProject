@@ -17,6 +17,9 @@ protected:
 
 signals:
     void sendPixel(QPoint pixel);
+
+private:
+
 };
 
 #endif // PIXELCHOOSER_H

@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <QDebug>
+#include <QPoint>
 
 using namespace std;
 
@@ -370,5 +371,12 @@ float** eigenToCal(float* eigenvecMin) {
     return cal;
 }
 
+void getEpiline(float* line, float** f, QPoint p){
+    float x = p.x();
+    float y = p.y();
+    line[1] = f[1][1]*x + f[1][2]*y + f[1][3];
+    line[2] = f[2][1]*x + f[2][2]*y + f[2][3];
+    line[3] = f[3][1]*x + f[3][2]*y + f[3][3];
+}
 
 #endif // VISPRO_H

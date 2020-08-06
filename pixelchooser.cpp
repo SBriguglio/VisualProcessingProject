@@ -1,6 +1,8 @@
 #include "pixelchooser.h"
 #include "vispro.h"
 #include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
 
 pixelChooser::pixelChooser(QWidget *parent) : QGraphicsView(parent),
     _Size(0)
@@ -85,6 +87,11 @@ void pixelChooser::SVD(pixelChooser *a, pixelChooser *b)
     printMatrix(b->_fundamentMatrix, 3, 3);
 }
 
+void pixelChooser::setLine(QPoint pixel)
+{
+    getEpiline(getLine(), getFundamentalMatrix(), pixel);
+}
+
 void pixelChooser::mousePressEvent(QMouseEvent *event)
 {
     if(this->isInteractive()){
@@ -93,4 +100,7 @@ void pixelChooser::mousePressEvent(QMouseEvent *event)
         emit sendPixel(event->pos());
     }
 }
+
+
+
 

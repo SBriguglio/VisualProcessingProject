@@ -41,6 +41,10 @@ private slots:
 
     void receivePixelRight(QPoint pixel);
 
+    void drawEpipolarLineLeft(QPoint pixelFromRight);
+
+    void drawEpipolarLineRight(QPoint pixelFromLeft);
+
     void on_pushButton_EpipolarMode_clicked();
 
 protected:
@@ -59,7 +63,5 @@ private:
     QString file_path_right;
     QGraphicsScene *scene_left;
     QGraphicsScene *scene_right;
-
-
 };
 #endif // MAINWINDOW_H

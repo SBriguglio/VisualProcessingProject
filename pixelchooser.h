@@ -6,6 +6,9 @@
 #include <QMouseEvent>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
+#include <QPen>
+#include <QColor>
+
 
 class pixelChooser : public QGraphicsView
 {
@@ -46,6 +49,9 @@ public:
 
     void SVD(pixelChooser *a, pixelChooser *b);
 
+    void setLine(QPoint pixel);
+    float *getLine() const {return _line;}
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
 
@@ -53,6 +59,7 @@ signals:
     void sendPixel(QPoint pixel);
 
 private:
+    QGraphicsScene *scene;
     float _ArrayX[100];
     float _ArrayY[100];
     float *_VecX;
@@ -63,6 +70,8 @@ private:
     float *_eigenValues;
     float *_minEigenvector;
     int _Size;
+    float *_line;
+    QPen _pen;
 };
 
 #endif // PIXELCHOOSER_H

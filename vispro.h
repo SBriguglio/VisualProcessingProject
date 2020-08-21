@@ -49,6 +49,7 @@ static float at, bt, ct;
 (ct=bt/at,at*sqrt(1.0+ct*ct)) : (bt ? (ct=at/bt,bt*sqrt(1.0+ct*ct)): 0.0))
 
 static float maxarg1, maxarg2;
+#define MAX_TEMP MAX;
 #define MAX(a,b) (maxarg1=(a),maxarg2=(b),(maxarg1) > (maxarg2) ?\
     (maxarg1) : (maxarg2))
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
@@ -259,9 +260,9 @@ Outputs:
     }
 }
 
-
+#define MAX MAX_TEMP
 #undef SIGN
-#undef MAX
+#undef MAX_TEMP
 #undef PYTHAG
 
 void printMatrix(float** M, int m, int n) {
@@ -378,5 +379,10 @@ void getEpiline(float* line, float** f, QPoint p){
     line[2] = f[2][1]*x + f[2][2]*y + f[2][3];
     line[3] = f[3][1]*x + f[3][2]*y + f[3][3];
 }
+
+
+
+
+
 
 #endif // VISPRO_H

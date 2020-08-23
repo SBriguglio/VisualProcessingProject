@@ -30,10 +30,10 @@ void MainWindow::on_pushButton_OpenLeft_clicked()
     }
     file_path_left = file_name;
     ui->label_filepath_left->setText("Left Image: " + file_path_left);
-    scene_left->addPixmap(imageLeft);
+    scene_left->addPixmap(imageLeft.scaledToWidth(ui->graphicsView_image_left->width(), Qt::SmoothTransformation));
     ui->graphicsView_image_left->setScene(scene_left);
     ui->graphicsView_image_left->setSceneRect(0,0,imageLeft.width(), imageLeft.height());
-    ui->graphicsView_image_left->fitInView(ui->graphicsView_image_left->sceneRect(),Qt::KeepAspectRatio);
+    //ui->graphicsView_image_left->fitInView(ui->graphicsView_image_left->sceneRect(),Qt::KeepAspectRatio);
 }
 
 void MainWindow::on_pushButton_OpenRight_clicked()
@@ -46,11 +46,11 @@ void MainWindow::on_pushButton_OpenRight_clicked()
     }
     file_path_right = file_name;
     ui->label_filepath_right->setText("Right Image: " + file_path_right);
-    scene_right->addPixmap(imageRight);
+    scene_right->addPixmap(imageRight.scaledToWidth(ui->graphicsView_image_right->width(), Qt::SmoothTransformation));
     scene_right->setSceneRect(imageRight.rect());
     ui->graphicsView_image_right->setScene(scene_right);
     ui->graphicsView_image_right->setSceneRect(0,0,imageRight.width(), imageRight.height());
-    ui->graphicsView_image_right->fitInView(ui->graphicsView_image_right->sceneRect(),Qt::KeepAspectRatio);
+    //ui->graphicsView_image_right->fitInView(ui->graphicsView_image_right->sceneRect(),Qt::KeepAspectRatio);
 }
 
 void MainWindow::on_pushButton_clicked() //should read on_pushButton_match_pixels_clicked
@@ -112,45 +112,96 @@ void MainWindow::receivePixelRight(QPoint pixel)
 void MainWindow::drawEpipolarLineLeft(QPoint pixelFromRight)
 {
     QPen pen;
-    pen.setWidth(10);
+    pen.setWidth(1);
     pen.setColor(QColor(255,127,0));
-    qDebug() << "Right pixel selected";
+
+    float height = this->ui->graphicsView_image_left->sceneRect().height();
+    float width = this->ui->graphicsView_image_left->sceneRect().width();
+    float maxLength = sqrt(pow(height, 2)+pow(width, 2));
+    qDebug() << "height: " << height;
+    qDebug() << "w: " << width;
     float px = pixelFromRight.x();
     float py = pixelFromRight.y();
+    qDebug() << "Right pixel selected: (" << px <<", " << py <<" )";
     qDebug() << "I";
-    float** f = this->ui->graphicsView_image_left->getFundamentalMatrix();
-    qDebug() << "I";
-    float a = f[1][1]*px + f[1][2]*py + f[1][3];
-    float b = f[2][1]*px + f[2][2]*py + f[2][3];
-    float c = f[3][1]*px + f[3][2]*py + f[3][3];
+
+    cv::Mat fM = this->ui->graphicsView_image_right->getcvFundamentalMatrix();
+    cv::Mat p(3,1,CV_64FC1);
+
+    p.at<double>(0,0) = px;
+    p.at<double>(1,0) = py;
+    p.at<double>(2,0) = 1;
+
+    cv::Mat line = fM*p;
+
+    //std::cerr << "fM " << endl << " " << fM << endl << endl;
+    //std::cerr << "p " << endl << " " << p << endl << endl;
+    //std::cerr << "line" << endl << " " << line << endl << endl;
+
+    float a = line.at<double>(0,0);
+    float b = line.at<double>(1,0);
+    float c = line.at<double>(2,0);
     qDebug() << "I" << a << b << c;
+
     float x0 = 0;
-    float y0 = (0-c)/b;
-    float x1 = (0-c)/a;
-    float y1 = 0;
-    qDebug() << "I";
-    scene_left->addLine(x0,y0,x1,y1,pen);
-    //scene_left->addLine(0,0,100,100);
+    float y0 = (0-c)/a;
+    float x1 = (((-1)*height*b)-c)/a;
+    float y1 = height;
+
+    QPointF basepoint = this->ui->graphicsView_image_left->mapToScene(x0, y0);
+    QPointF endpoint = this->ui->graphicsView_image_left->mapToScene(x1, y1);
+    //scene_left->addLine(x0,y0,x1,y1,pen);
+    QLineF sLine(basepoint, endpoint+QPointF(1,0));
+
+    sLine.setLength(maxLength);
+    scene_left->addLine(sLine, pen);
 }
 
 void MainWindow::drawEpipolarLineRight(QPoint pixelFromLeft)
 {
     QPen pen;
-    pen.setWidth(10);
+    pen.setWidth(1);
     pen.setColor(QColor(255,127,0));
-    qDebug() << "Left pixel selected";
+    float height = this->ui->graphicsView_image_right->sceneRect().height();
+    float width = this->ui->graphicsView_image_right->sceneRect().width();
+    float maxLength = sqrt(pow(height, 2)+pow(width, 2));
+
+    qDebug() << "height (left): " << height;
+
     float px = pixelFromLeft.x();
     float py = pixelFromLeft.y();
-    float** f = this->ui->graphicsView_image_right->getFundamentalMatrix();
-    float a = f[1][1]*px + f[1][2]*py + f[1][3];
-    float b = f[2][1]*px + f[2][2]*py + f[2][3];
-    float c = f[3][1]*px + f[3][2]*py + f[3][3];
+    qDebug() << "Left pixel selected: (" << px <<", " << py <<" )";
+    cv::Mat fM = this->ui->graphicsView_image_left->getcvFundamentalMatrix();
+    cv::Mat p(3,1,CV_64FC1);
+
+    p.at<double>(0,0) = px;
+    p.at<double>(1,0) = py;
+    p.at<double>(2,0) = 1;
+
+    cv::Mat line = fM*p;
+
+    //std::cerr << "fM " << endl << " " << fM << endl << endl;
+    //std::cerr << "p " << endl << " " << p << endl << endl;
+    //std::cerr << "line" << endl << " " << line << endl << endl;
+
+    double a = line.at<double>(0,0);
+    double b = line.at<double>(1,0);
+    double c = line.at<double>(2,0);
+
+    qDebug() << "I" << a << b << c;
+
     float x0 = 0;
-    float y0 = (0-c)/b;
-    float x1 = (0-c)/a;
-    float y1 = 0;
-    qDebug() << a << b << c;
-    scene_right->addLine(x0,y0,x1,y1,pen);
+    float y0 = (0-c)/a;
+    float x1 = (((-1)*height*b)-c)/a;
+    float y1 = height;
+
+    QPointF basepoint = this->ui->graphicsView_image_right->mapToScene(x0, y0);
+    QPointF endpoint = this->ui->graphicsView_image_right->mapToScene(x1, y1);
+    //scene_left->addLine(x0,y0,x1,y1,pen);
+    QLineF sLine(basepoint, endpoint+QPointF(1,0));
+
+    sLine.setLength(maxLength);
+    scene_right->addLine(sLine, pen);
 }
 
 void MainWindow::receivePixelLeft(QPoint pixel)
@@ -172,13 +223,16 @@ void MainWindow::on_pushButton_EpipolarMode_clicked()
     this->ui->pushButton_stop->setVisible(false);
     pixelChooser *a = this->ui->graphicsView_image_left;
     pixelChooser *b = this->ui->graphicsView_image_right;
-    this->ui->graphicsView_image_left->fillSVD(a, b);
-    this->ui->graphicsView_image_left->SVD(a, b);
+    a->fillFundamentalMatrix(b);  //set fundamental matrix a-to-b
+    b->fillFundamentalMatrix(a);  //set fundamental matrix b-to-a
 
     this->ui->pushButton_EpipolarMode->setEnabled(false);
     this->ui->statusbar->showMessage("Epipolar Mode Enabled. Select pixels to draw the resulting epipolar line.");
+
+    //disconnet old slots
     disconnect(this->ui->graphicsView_image_left, SIGNAL(sendPixel(QPoint)), this, SLOT(receivePixelLeft(QPoint)));
     disconnect(this->ui->graphicsView_image_right, SIGNAL(sendPixel(QPoint)), this, SLOT(receivePixelRight(QPoint)));
+    //connect new slots
     connect(this->ui->graphicsView_image_left, SIGNAL(sendPixel(QPoint)), this, SLOT(drawEpipolarLineRight(QPoint)));
     connect(this->ui->graphicsView_image_right, SIGNAL(sendPixel(QPoint)), this, SLOT(drawEpipolarLineLeft(QPoint)));
 

@@ -3,10 +3,7 @@
 #include <QMessageBox>
 #include <QPaintEvent>
 #include <QPainter>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/calib3d.hpp>
-
+#include <QGraphicsScene>
 
 pixelChooser::pixelChooser(QWidget *parent) : QGraphicsView(parent),
     _Size(0)
@@ -30,12 +27,36 @@ void pixelChooser::initSVDMatrix()
 }
 
 void pixelChooser::initFundamentalMatrix()
-{
+{   //deprecated
     this->_fundamentMatrix = ud_matrix(1,3,1,3);
 }
 
+void pixelChooser::fillFundamentalMatrix(pixelChooser *b){
+    pixelChooser *a = this;
+    int size = a->getSize();
+    if(b->getSize()<size) size=b->getSize(); //really this should result in an error, refactor later
+    //after points have been selected
+    //create two vectors
+    vector<cv::Point2i> Apoints(size);
+    vector<cv::Point2i> Bpoints(size);
+    for(int i=0; i<size; i++){
+        Apoints[i] = cv::Point2i(a->getArrayX(i), a->getArrayY(i));
+        Bpoints[i] = cv::Point2i(b->getArrayX(i), b->getArrayY(i));
+    }
+    this->_cvFundamentalMatrix = cv::findFundamentalMat(Apoints, Bpoints, cv::FM_LMEDS);
+
+    for(int i=0; i< this->_cvFundamentalMatrix.rows; i++){ //test print
+            const double* fM = this->_cvFundamentalMatrix.ptr<double>(i);
+            QString out = QString("");
+            for(int j=0; j<this->_cvFundamentalMatrix.cols; j++){
+                out.append(QString(QString::number(fM[j])).append(" "));
+            }
+            qDebug() << "[ " << out << " ]";
+        }
+}
+
 void pixelChooser::fillSVD(pixelChooser *a, pixelChooser *b)
-{
+{ //DEPRECATED WITH svdRoutine()
 
 
     if(a->getSize() != b->getSize()){
@@ -88,40 +109,6 @@ void pixelChooser::SVD(pixelChooser *a, pixelChooser *b)
     printVector(b->_minEigenvector, 9);
 
     a->_fundamentMatrix = eigenToCal(a->_minEigenvector);
-
-    vector<cv::Point2f> lpoints(10);
-    vector<cv::Point2f> rpoints(10);
-    lpoints[0] = cv::Point2f(287, 220);
-    lpoints[1] = cv::Point2f(520, 186);
-    lpoints[2] = cv::Point2f(699, 140);
-    lpoints[3] = cv::Point2f(435, 348);
-    lpoints[4] = cv::Point2f(558, 329);
-    lpoints[5] = cv::Point2f(635, 298);
-    lpoints[6] = cv::Point2f(354, 539);
-    lpoints[7] = cv::Point2f(596, 449);
-    lpoints[8] = cv::Point2f(721, 389);
-    lpoints[9] = cv::Point2f(821, 394);
-
-    rpoints[0] = cv::Point2f(286, 209);
-    rpoints[1] = cv::Point2f(486, 232);
-    rpoints[2] = cv::Point2f(695, 234);
-    rpoints[3] = cv::Point2f(321, 345);
-    rpoints[4] = cv::Point2f(428, 365);
-    rpoints[5] = cv::Point2f(534, 371);
-    rpoints[6] = cv::Point2f(171, 465);
-    rpoints[7] = cv::Point2f(383, 480);
-    rpoints[8] = cv::Point2f(537, 481);
-    rpoints[9] = cv::Point2f(639, 530);
-
-    auto fundamental_matrix = cv::findFundamentalMat(lpoints, rpoints);
-    qDebug() << "HERE IT GOES!! <3";
-    for(int i=0; i< fundamental_matrix.rows; i++){
-        const double* fM = fundamental_matrix.ptr<double>(i);
-        for(int j=0; j<fundamental_matrix.cols; j++){
-            qDebug() << " " << fM[j] << " ";
-        }
-    }
-
     b->_fundamentMatrix = a->_fundamentMatrix;
     qDebug() << "Fundamental Matrix completed";
     printMatrix(b->_fundamentMatrix, 3, 3);
@@ -135,11 +122,27 @@ void pixelChooser::setLine(QPoint pixel)
 void pixelChooser::mousePressEvent(QMouseEvent *event)
 {
     if(this->isInteractive()){
-        this->addCoordinate(event->x(), event->y());
+        QPointF scenePoint = this->mapToScene(event->pos());
+        this->addCoordinate(scenePoint.x(), scenePoint.y());
+
         //this->printCoordinates();
         emit sendPixel(event->pos());
     }
 }
+
+/*
+void pixelChooser::mousePressEvent(QGraphicsSceneMouseEvent *event){
+    if(this->isInteractive()){
+        QPointF scenePoint = event->scenePos();
+        //this->addCoordinate(scenePoint.x(), scenePoint.y());
+        qDebug() << "ScenePoint: " << scenePoint;
+        //this->printCoordinates();
+        emit sendPixel(QPoint(scenePoint.x(), scenePoint.y()));
+    }
+}
+*/
+
+
 
 
 

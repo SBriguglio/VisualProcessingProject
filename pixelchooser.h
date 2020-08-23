@@ -4,10 +4,14 @@
 #include <QWidget>
 #include <QGraphicsView>
 #include <QMouseEvent>
+#include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 #include <QPen>
 #include <QColor>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/calib3d.hpp>
 
 
 class pixelChooser : public QGraphicsView
@@ -41,6 +45,8 @@ public:
 
     void initFundamentalMatrix();
     void setFundamentalMatrix(float **m) {_fundamentMatrix = m;}
+    void fillFundamentalMatrix(pixelChooser *b);
+    cv::Mat getcvFundamentalMatrix() const {return _cvFundamentalMatrix;}
     float** getFundamentalMatrix() const {return _fundamentMatrix;}
 
     void printCoordinates(){for(int i=0; i<_Size; i++){qDebug() << _ArrayX[i] << ", " << _ArrayY[i] << "\n";} qDebug() << "mSize = " << _Size << "\n";}
@@ -52,8 +58,11 @@ public:
     void setLine(QPoint pixel);
     float *getLine() const {return _line;}
 
+
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
+    //void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 signals:
     void sendPixel(QPoint pixel);
@@ -72,6 +81,7 @@ private:
     int _Size;
     float *_line;
     QPen _pen;
+    cv::Mat _cvFundamentalMatrix;
 };
 
 #endif // PIXELCHOOSER_H

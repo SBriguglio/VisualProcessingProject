@@ -1,3 +1,8 @@
+/*
+ * NOTE: This entire header is going to become deprecated shortly
+ *       as OpenCV is implemented.
+ */
+
 #ifndef VISPRO_H
 #define VISPRO_H
 
@@ -55,7 +60,8 @@ static float maxarg1, maxarg2;
 #define SIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
 
 void svdRoutine(float** A, int m, int n, float* w, float** v)
-/* Calculates the SVD of matrix A
+/* DEPRECATED
+ * Calculates the SVD of matrix A
 Inputs:
          A: a matrix of m lines and n columns
      m: the number of lines of matrix A
@@ -73,7 +79,6 @@ Outputs:
     float c, f, h, s, x, y, z;
     float anorm = 0.0, g = 0.0, scale = 0.0;
     float* rv1;
-    int setBit = 0;
 
     if (m < n)
         printf("SVDCMP: You must augment A with extra zero rows\n");

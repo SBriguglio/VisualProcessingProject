@@ -112,18 +112,17 @@ void MainWindow::receivePixelRight(QPoint pixel)
 void MainWindow::drawEpipolarLineLeft(QPoint pixelFromRight)
 {
     QPen pen;
-    pen.setWidth(1);
+    pen.setWidth(2);
     pen.setColor(QColor(255,127,0));
 
     float height = this->ui->graphicsView_image_left->sceneRect().height();
     float width = this->ui->graphicsView_image_left->sceneRect().width();
     float maxLength = sqrt(pow(height, 2)+pow(width, 2));
-    qDebug() << "height: " << height;
-    qDebug() << "w: " << width;
+
     float px = pixelFromRight.x();
     float py = pixelFromRight.y();
+
     qDebug() << "Right pixel selected: (" << px <<", " << py <<" )";
-    qDebug() << "I";
 
     cv::Mat fM = this->ui->graphicsView_image_right->getcvFundamentalMatrix();
     cv::Mat p(3,1,CV_64FC1);
@@ -150,7 +149,6 @@ void MainWindow::drawEpipolarLineLeft(QPoint pixelFromRight)
 
     QPointF basepoint = this->ui->graphicsView_image_left->mapToScene(x0, y0);
     QPointF endpoint = this->ui->graphicsView_image_left->mapToScene(x1, y1);
-    //scene_left->addLine(x0,y0,x1,y1,pen);
     QLineF sLine(basepoint, endpoint+QPointF(1,0));
 
     sLine.setLength(maxLength);
@@ -160,17 +158,18 @@ void MainWindow::drawEpipolarLineLeft(QPoint pixelFromRight)
 void MainWindow::drawEpipolarLineRight(QPoint pixelFromLeft)
 {
     QPen pen;
-    pen.setWidth(1);
-    pen.setColor(QColor(255,127,0));
+    pen.setWidth(2);
+    pen.setColor(QColor(255,127,255));
+
     float height = this->ui->graphicsView_image_right->sceneRect().height();
     float width = this->ui->graphicsView_image_right->sceneRect().width();
     float maxLength = sqrt(pow(height, 2)+pow(width, 2));
 
-    qDebug() << "height (left): " << height;
-
     float px = pixelFromLeft.x();
     float py = pixelFromLeft.y();
+
     qDebug() << "Left pixel selected: (" << px <<", " << py <<" )";
+
     cv::Mat fM = this->ui->graphicsView_image_left->getcvFundamentalMatrix();
     cv::Mat p(3,1,CV_64FC1);
 
@@ -187,7 +186,6 @@ void MainWindow::drawEpipolarLineRight(QPoint pixelFromLeft)
     double a = line.at<double>(0,0);
     double b = line.at<double>(1,0);
     double c = line.at<double>(2,0);
-
     qDebug() << "I" << a << b << c;
 
     float x0 = 0;
@@ -197,7 +195,6 @@ void MainWindow::drawEpipolarLineRight(QPoint pixelFromLeft)
 
     QPointF basepoint = this->ui->graphicsView_image_right->mapToScene(x0, y0);
     QPointF endpoint = this->ui->graphicsView_image_right->mapToScene(x1, y1);
-    //scene_left->addLine(x0,y0,x1,y1,pen);
     QLineF sLine(basepoint, endpoint+QPointF(1,0));
 
     sLine.setLength(maxLength);

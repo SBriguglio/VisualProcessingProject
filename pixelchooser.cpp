@@ -4,6 +4,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QGraphicsScene>
+#include <QThread>
 
 pixelChooser::pixelChooser(QWidget *parent) : QGraphicsView(parent),
     _Size(0)
@@ -43,7 +44,8 @@ void pixelChooser::fillFundamentalMatrix(pixelChooser *b){
         Apoints[i] = cv::Point2i(a->getArrayX(i), a->getArrayY(i));
         Bpoints[i] = cv::Point2i(b->getArrayX(i), b->getArrayY(i));
     }
-    this->_cvFundamentalMatrix = cv::findFundamentalMat(Apoints, Bpoints, cv::FM_LMEDS);
+    this->_cvFundamentalMatrix = cv::findFundamentalMat(Apoints, Bpoints, cv::FM_LMEDS, 1,0.9999);
+    QThread::sleep(5);
 
     for(int i=0; i< this->_cvFundamentalMatrix.rows; i++){ //test print
             const double* fM = this->_cvFundamentalMatrix.ptr<double>(i);

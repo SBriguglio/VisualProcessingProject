@@ -166,9 +166,9 @@ void MainWindow::drawEpipolarLineLeft(QPoint pixelFromRight)
         }
         --x0;
     }
-    if(x1<0 || x1>900){
+    if(x1<0 || x1>800){
         --y1;
-        while((x1 < 0 || x1 > 900) && y1 > 0){
+        while((x1 < 0 || x1 > 800) && y1 > 0){
             x1 = ((b*(-1)*y1)-c)/a;
             --y1;
         }
@@ -230,9 +230,9 @@ void MainWindow::drawEpipolarLineRight(QPoint pixelFromLeft)
         }
         --x0;
     }
-    if(x1<0 || x1>900){
+    if(x1<0 || x1>800){
         --y1;
-        while((x1 < 0 || x1 > 900) && y1 > 0){
+        while((x1 < 0 || x1 > 800) && y1 > 0){
             x1 = ((b*(-1)*y1)-c)/a;
             --y1;
         }
@@ -340,15 +340,44 @@ void MainWindow::matchPixelModeLeft(QPoint pixel){
 
     cv::Mat line = fM*p;
 
-    float a = line.at<double>(0,0);
-    float b = line.at<double>(1,0);
-    float c = line.at<double>(2,0);
+    double a = line.at<double>(0,0);
+    double b = line.at<double>(1,0);
+    double c = line.at<double>(2,0);
     qDebug() << "I" << a << b << c;
+
+    float x0 = 0;
+    float y0 = (0-c)/b;
+    float x1 = (((-1)*height*b)-c)/a;
+    float y1 = height;
+
+    //check x,y within bounds
+    if(y0<0 || y0>600){
+        ++x0;
+        while((y0 < 0 || y0 > 600) && x0 < 800){
+            y0 = ((a*(-1)*x0)-c)/b;
+            ++x0;
+        }
+        --x0;
+    }
+    if(x1<0 || x1>800){
+        --y1;
+        while((x1 < 0 || x1 > 800) && y1 > 0){
+            x1 = ((b*(-1)*y1)-c)/a;
+            --y1;
+        }
+        ++y1;
+    }
+
+    QPointF basepoint = QPointF(x0, y0);
+    QPointF endpoint = QPointF(x1, y1);
+
+    //while loop to follow the line starting at x0, y0, CHECK FOR PADDING BY MAKING SURE 3<x0<797 and 3<x0<597
+
+
+
 
     int xM = 3;
     int yM = 3;
-
-
     scene_left->addEllipse(xM, yM, 2, 2, pen, QBrush(Qt::red));
 }
 

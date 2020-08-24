@@ -58,14 +58,18 @@ public:
     void setLine(QPoint pixel);
     float *getLine() const {return _line;}
 
-
+    void setAddbit(bool b){addbit=b;}
+    bool getAddbit() const {return addbit;}
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
-    //void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 signals:
     void sendPixel(QPoint pixel);
+
+public:
+    QPixmap picture;
+    QImage pic;
 
 private:
     QGraphicsScene *scene;
@@ -82,6 +86,7 @@ private:
     float *_line;
     QPen _pen;
     cv::Mat _cvFundamentalMatrix;
+    bool addbit = true;
 };
 
 #endif // PIXELCHOOSER_H

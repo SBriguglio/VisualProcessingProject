@@ -15,6 +15,7 @@
 #include <QImageWriter>
 #include <QPicture>
 #include <QGraphicsView>
+#include <opencv2/core.hpp>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -46,6 +47,12 @@ private slots:
     void drawEpipolarLineRight(QPoint pixelFromLeft);
 
     void on_pushButton_EpipolarMode_clicked();
+
+    void on_pushButton_pmatching_clicked();
+
+    void matchPixelModeLeft(QPoint);
+
+    void matchPixelModeRight(QPoint);
 
 protected:
     /*TODO:

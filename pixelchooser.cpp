@@ -44,8 +44,8 @@ void pixelChooser::fillFundamentalMatrix(pixelChooser *b){
         Apoints[i] = cv::Point2i(a->getArrayX(i), a->getArrayY(i));
         Bpoints[i] = cv::Point2i(b->getArrayX(i), b->getArrayY(i));
     }
-    this->_cvFundamentalMatrix = cv::findFundamentalMat(Apoints, Bpoints, cv::FM_LMEDS, 1,0.9999);
-    QThread::sleep(5);
+    this->_cvFundamentalMatrix = cv::findFundamentalMat(Apoints, Bpoints, cv::FM_LMEDS, 0, 0.99);
+    QThread::sleep(1);
 
     for(int i=0; i< this->_cvFundamentalMatrix.rows; i++){ //test print
             const double* fM = this->_cvFundamentalMatrix.ptr<double>(i);
@@ -125,24 +125,17 @@ void pixelChooser::mousePressEvent(QMouseEvent *event)
 {
     if(this->isInteractive()){
         QPointF scenePoint = this->mapToScene(event->pos());
-        this->addCoordinate(scenePoint.x(), scenePoint.y());
+        if(this->addbit)this->addCoordinate(scenePoint.x(), scenePoint.y());
+        qDebug() << "scenePoint " << scenePoint.x() << ", " << scenePoint.y();
+        qDebug() << "scenePoint " << scenePoint.rx() << ", " << scenePoint.ry();
+        qDebug() << "event pos" << event->pos();
+        qDebug() << "event localPos" << event->localPos();
 
         //this->printCoordinates();
         emit sendPixel(event->pos());
     }
 }
 
-/*
-void pixelChooser::mousePressEvent(QGraphicsSceneMouseEvent *event){
-    if(this->isInteractive()){
-        QPointF scenePoint = event->scenePos();
-        //this->addCoordinate(scenePoint.x(), scenePoint.y());
-        qDebug() << "ScenePoint: " << scenePoint;
-        //this->printCoordinates();
-        emit sendPixel(QPoint(scenePoint.x(), scenePoint.y()));
-    }
-}
-*/
 
 
 

@@ -7,7 +7,7 @@ in these epipolar lines using ZNCC method.
 ### Objectives:
 Become familiar with Qt5, OpenCV, C++ and addressing common problems in computer vision.
 ### Outcome:
-I've become very familiar with Qt5, OpenCV and C++ and OOP. This was definitely an exciting, challenging project to work on. I specifically chose to use C++ and not Python 
+I've become very familiar with Qt5, OpenCV and C++ and OOP. This was definitely an exciting, challenging project to work on. Looking forward to taking more grad courses before completeing my BSc. I specifically chose to use C++ and not Python 
 in order to improve my own skills in a very ubiquitous and powerful language. I am actually very interested in GUI design and Qt5 in addition to computer vision, which is not 
 what I was expecting at all. A very well-rounded learning experience which I aim to continue adding to and improving. Definily looking forward to using both Qt5 and OpenCV again with C++.
 ### Issues:

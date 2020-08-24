@@ -300,8 +300,11 @@ void MainWindow::on_pushButton_pmatching_clicked()
     QPixmap imageLeft = ui->graphicsView_image_left->picture;
     QPixmap imageRight = ui->graphicsView_image_right->picture;
 
-    QImage imagel =(imageLeft.toImage());
-    QImage imager = (imageRight.toImage());
+    QImage imagel =(imageLeft.toImage().convertToFormat(QImage::Format_Indexed8));
+    QImage imager = (imageRight.toImage().convertToFormat(QImage::Format_Indexed8));
+
+    ui->graphicsView_image_left->pic = imagel;
+    ui->graphicsView_image_right->pic = imager;
 
     scene_left->addPixmap(imageLeft.scaledToWidth(ui->graphicsView_image_left->width(), Qt::SmoothTransformation));
     scene_left->setSceneRect(imageLeft.rect());
@@ -313,8 +316,8 @@ void MainWindow::on_pushButton_pmatching_clicked()
     ui->graphicsView_image_right->setScene(scene_right);
     ui->graphicsView_image_right->setSceneRect(0,0,imageRight.width(), imageRight.height());
 
-    connect(this->ui->graphicsView_image_left, SIGNAL(sendPixel(QPoint)), this, SLOT(drawEpipolarLineRight(QPoint)));
-    connect(this->ui->graphicsView_image_right, SIGNAL(sendPixel(QPoint)), this, SLOT(drawEpipolarLineLeft(QPoint)));
+    connect(this->ui->graphicsView_image_left, SIGNAL(sendPixel(QPoint)), this, SLOT(matchPixelModeRight(QPoint)));
+    connect(this->ui->graphicsView_image_right, SIGNAL(sendPixel(QPoint)), this, SLOT(matchPixelModeLeft(QPoint)));
 
 }
 
@@ -372,17 +375,134 @@ void MainWindow::matchPixelModeLeft(QPoint pixel){
     QPointF endpoint = QPointF(x1, y1);
 
     //while loop to follow the line starting at x0, y0, CHECK FOR PADDING BY MAKING SURE 3<x0<797 and 3<x0<597
+    float xp = x0;
+    float yp = y0;
+    //put xp, yp between new bounds
+    if(yp<3 || yp>597){
+        ++xp;
+        while((yp < 3 || yp > 597) && xp < 797){
+            yp = ((a*(-1)*xp)-c)/b;
+            ++xp;
+        }
+        --xp;
+    }
+    //now map the ZNCC scores by stepping along the line
+    float d = sqrt(pow((x1-x0),2)+pow((y1-y0), 2));
+    float cx = x0-x1;
+    float d2 = d/1000;
+    int step = 1;
+    float x_max = xp;
+    float y_max = yp;
+    float score = 0;
+    float ZNCC_max = 0;
+    QPoint t;
+    do{
+        t = QPoint(xp, yp);
+        qDebug() << "t" << t;
+        score = znccScore(pixel, t, &this->ui->graphicsView_image_right->pic, &this->ui->graphicsView_image_left->pic);
+        if(score > ZNCC_max){
+            ZNCC_max = score;
+            x_max = xp;
+            y_max = yp;
+            qDebug() << "ZNCC: " << ZNCC_max;
+        }
+        //set xp and yp to point 1 step down the line
+        xp = x0 - (((step++)*d2*cx)/d);
+        yp = ((a*(-1)*xp)-c)/b;
+        if(xp > 796 || xp < 4 || yp > 596 || yp < 4 || step>996) break;
+    }while((xp >3 && xp <797 && yp > 3 && yp <597));
 
-
-
-
-    int xM = 3;
-    int yM = 3;
-    scene_left->addEllipse(xM, yM, 2, 2, pen, QBrush(Qt::red));
+    scene_left->addEllipse(x_max, y_max, 2, 2, pen, QBrush(Qt::red));
 }
 
 void MainWindow::matchPixelModeRight(QPoint pixel){
+    QPen pen;
+    pen.setWidth(3);
+    pen.setColor(QColor(150,238,50));
 
+    float height = this->ui->graphicsView_image_right->sceneRect().height();
+
+    float px = pixel.x();
+    float py = pixel.y();
+
+    qDebug() << "Left pixel selected: (" << px <<", " << py <<" )";
+
+    cv::Mat fM = this->ui->graphicsView_image_left->getcvFundamentalMatrix();
+    cv::Mat p(3,1,CV_64FC1);
+
+    p.at<double>(0,0) = px;
+    p.at<double>(1,0) = py;
+    p.at<double>(2,0) = 1;
+
+    cv::Mat line = fM*p;
+
+    double a = line.at<double>(0,0);
+    double b = line.at<double>(1,0);
+    double c = line.at<double>(2,0);
+    qDebug() << "I" << a << b << c;
+
+    float x0 = 0;
+    float y0 = (0-c)/b;
+    float x1 = (((-1)*height*b)-c)/a;
+    float y1 = height;
+
+    //check x,y within bounds
+    if(y0<0 || y0>600){
+        ++x0;
+        while((y0 < 0 || y0 > 600) && x0 < 800){
+            y0 = ((a*(-1)*x0)-c)/b;
+            ++x0;
+        }
+        --x0;
+    }
+    if(x1<0 || x1>800){
+        --y1;
+        while((x1 < 0 || x1 > 800) && y1 > 0){
+            x1 = ((b*(-1)*y1)-c)/a;
+            --y1;
+        }
+        ++y1;
+    }
+
+    //while loop to follow the line starting at x0, y0, CHECK FOR PADDING BY MAKING SURE 3<x0<797 and 3<x0<597
+    float xp = x0;
+    float yp = y0;
+    //put xp, yp between new bounds
+    if(yp<3 || yp>597){
+        ++xp;
+        while((yp < 3 || yp > 597) && xp < 797){
+            yp = ((a*(-1)*xp)-c)/b;
+            ++xp;
+        }
+        --xp;
+    }
+    //now map the ZNCC scores by stepping along the line
+    float d = sqrt(pow((x1-x0),2)+pow((y1-y0), 2));
+    float cx = x0-x1;
+    float d2 = d/1000;
+    int step = 1;
+    float x_max = xp;
+    float y_max = yp;
+    float score = 0;
+    float ZNCC_max = 0;
+    QPoint t;
+    do{
+        t = QPoint(xp, yp);
+        qDebug() << "t: " << t;
+        score = znccScore(pixel, t, &this->ui->graphicsView_image_left->pic, &this->ui->graphicsView_image_right->pic);
+        if(score > ZNCC_max){
+            ZNCC_max = score;
+            x_max = xp;
+            y_max = yp;
+            qDebug() << "ZNCC: " << ZNCC_max;
+        }
+        //set xp and yp to point 1 step down the line
+        xp = x0 - (((step++)*d2*cx)/d);
+        yp = ((a*(-1)*xp)-c)/b;
+        if (xp > 796 || xp < 4 || yp > 596 || yp < 4 || step>996) break;
+    }while((xp >3 && xp <=796 && yp > 3 && yp <=596));
+
+    scene_right->addEllipse(x_max, y_max, 2, 2, pen, QBrush(Qt::red));
 }
 
 float znccScore(QPoint px_src, QPoint px_dest, QImage *pic_src, QImage *pic_dest){ //should really be moved to pixelchooser class
@@ -392,10 +512,10 @@ float znccScore(QPoint px_src, QPoint px_dest, QImage *pic_src, QImage *pic_dest
     //get avg of source
 
     //check px_src and px_dest have enough padding
-    if     (px_src.x()<3 || px_src.x()<= (pic_src->width()-3) ||
-            px_src.y()<3 || px_src.y()<= (pic_src->height()-3) ||
-            px_dest.x()<3 || px_dest.x()<= (pic_dest->width()-3) ||
-            px_dest.y()<3 || px_dest.y()<= (pic_dest->width()-3)){
+    if     (px_src.x()<3 || px_src.x()>= 797 ||
+            px_src.y()<3 || px_src.y()>= 597 ||
+            px_dest.x()<3 || px_dest.x()>= 797 ||
+            px_dest.y()<3 || px_dest.y()>= 597){
         qDebug() << "[!!] Warning: Not enough padding";
         return -1;
     }
@@ -406,7 +526,7 @@ float znccScore(QPoint px_src, QPoint px_dest, QImage *pic_src, QImage *pic_dest
     float avg_dest = getAverage(px_dest, pic_dest);
 
     float score = 0;
-    for(int i = -3; i<=+3 ; i++){
+    for(int i = -3; i<=3 ; i++){
         for(int j = -3; j<=3; j++){
             score += (pic_src->pixelIndex(i+px_src.x(), j+px_src.y())-avg_src) * (pic_dest->pixelIndex(i+px_dest.x(), j+px_dest.x())-avg_dest);
         }
